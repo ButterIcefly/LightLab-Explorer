@@ -1,0 +1,1023 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>小光实验室：为什么会有影子？</title>
+<style>
+  :root{
+    --bg:#0e1630; --panel:#17213f; --panel2:#202d52; --text:#f7f9ff; --muted:#b9c5e6;
+    --accent:#ffd45c; --accent2:#63d6ff; --good:#71e0a8; --danger:#ff8f9b; --line:#6070a8;
+    --card:#111a35; --shadow:0 18px 50px rgba(0,0,0,.28);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:ui-rounded,"SF Pro Rounded","PingFang SC","Microsoft YaHei",system-ui,sans-serif;background:radial-gradient(circle at 20% 10%,#21315f 0,#101830 35%,#0b1228 100%);color:var(--text);min-height:100vh}
+  button,input{font:inherit}
+  .app{max-width:1240px;margin:0 auto;padding:18px}
+  .topbar{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;margin-bottom:14px}
+  .brand{display:flex;gap:12px;align-items:center}
+  .bot-face{width:46px;height:46px;border-radius:14px;background:linear-gradient(145deg,#88e7ff,#3c81ff);box-shadow:var(--shadow);display:grid;place-items:center;color:#071224;font-weight:900}
+  h1{font-size:clamp(20px,3vw,30px);margin:0}.sub{margin-top:3px;color:var(--muted);font-size:14px}
+  .progress-area{position:relative;display:flex;align-items:center;justify-content:flex-end}.progress{display:flex;gap:7px;align-items:center}.dot{width:28px;height:28px;border-radius:50%;background:#28365f;border:2px solid #d5b64b;color:#ffe98d;display:grid;place-items:center;font-size:11px;font-weight:900;cursor:pointer;transition:.2s;padding:0}.dot:hover,.dot:focus-visible{transform:translateY(-2px);background:#3b4a76;outline:none;box-shadow:0 0 0 3px rgba(255,212,92,.16)}.dot:disabled{cursor:default;opacity:.72}.dot:disabled:hover,.dot:disabled:focus-visible{transform:none;background:#28365f;box-shadow:none;outline:none}.dot.on:disabled{background:var(--accent);color:#372900;border-color:#fff1a2;box-shadow:0 0 15px rgba(255,212,92,.35);opacity:.9}.dot.on{background:var(--accent);color:#372900;border-color:#fff1a2;box-shadow:0 0 15px rgba(255,212,92,.55)}.dot.current{outline:2px solid #fff;outline-offset:2px}.nav-tip{position:absolute;right:0;top:40px;width:320px;z-index:20;background:#fff3b4;color:#322600;border:2px solid #ffd45c;border-radius:15px;padding:11px 12px;box-shadow:0 14px 34px rgba(0,0,0,.28);font-size:13px;line-height:1.45}.nav-tip::before{content:'';position:absolute;right:28px;top:-9px;width:16px;height:16px;background:#fff3b4;border-left:2px solid #ffd45c;border-top:2px solid #ffd45c;transform:rotate(45deg)}.nav-tip button{margin-left:8px;border:0;border-radius:10px;background:#25345f;color:#fff;padding:6px 10px;font-weight:800;cursor:pointer}
+  .layout{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(300px,.85fr);gap:16px}
+  .stage-card,.side{background:linear-gradient(180deg,rgba(30,43,81,.97),rgba(19,29,59,.97));border:1px solid rgba(163,184,255,.14);border-radius:22px;box-shadow:var(--shadow)}
+  .stage-card{overflow:hidden}.stage-head{padding:16px 18px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .stage-title{font-size:18px;font-weight:800}.stage-chip{font-size:12px;padding:6px 10px;border-radius:999px;background:#24345f;color:#cceaff;border:1px solid #40588e}
+  .scene-wrap{position:relative;min-height:560px;background:linear-gradient(#151f3e 0 72%,#27203b 72%);overflow:hidden;touch-action:none}
+  .stars{position:absolute;inset:0;opacity:.16;background-image:radial-gradient(#fff 1px,transparent 1px);background-size:30px 30px}
+  #scene{position:absolute;inset:0;width:100%;height:100%}
+  .scene-ui{position:absolute;inset:0;pointer-events:none}
+  .objective{position:absolute;top:14px;left:14px;right:14px;background:rgba(8,14,33,.78);backdrop-filter:blur(9px);border:1px solid rgba(255,255,255,.1);border-radius:15px;padding:11px 13px;color:#eef4ff;font-size:14px;line-height:1.45}
+  .objective strong{color:var(--accent)}
+  .science-badge{position:absolute;bottom:14px;left:14px;background:rgba(8,14,33,.78);padding:7px 10px;border-radius:12px;color:#aeeaff;border:1px solid #355a79;font-size:12px}
+  .side{padding:16px;display:flex;flex-direction:column;gap:12px;min-height:560px}
+  .talk{background:var(--card);border-radius:18px;padding:15px;border:1px solid rgba(255,255,255,.08);line-height:1.6}
+  .talk .name{color:var(--accent2);font-weight:800;margin-bottom:6px}.talk p{margin:0;color:#edf3ff}
+  .controls{display:grid;gap:10px}.btn{border:0;border-radius:14px;padding:12px 14px;cursor:pointer;background:#2a3a69;color:white;font-weight:800;transition:.18s;text-align:left}.btn:hover{transform:translateY(-1px);background:#324779}.btn.primary{background:linear-gradient(135deg,#ffcf4f,#ffb13f);color:#2e2100}.btn.alt{background:linear-gradient(135deg,#4dd1ff,#6d8cff);color:#06162c}.btn.good{background:#2b7d60}.btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+  .btn.experiment-cta{position:relative;text-align:center;padding:17px 16px;font-size:16px;background:linear-gradient(135deg,#ffe66d,#ffb23f);color:#2a1a00;border:2px solid #fff0a9;box-shadow:0 0 0 4px rgba(255,212,92,.12),0 10px 26px rgba(255,177,63,.24);animation:ctaPulse 1.7s ease-in-out infinite}
+  .btn.experiment-cta:hover{background:linear-gradient(135deg,#ffef8a,#ffc25d);transform:translateY(-1px) scale(1.01)}
+  .btn.experiment-cta::before{content:'▶';margin-right:8px}
+  @keyframes ctaPulse{0%,100%{box-shadow:0 0 0 4px rgba(255,212,92,.10),0 10px 26px rgba(255,177,63,.20)}50%{box-shadow:0 0 0 8px rgba(255,212,92,.05),0 12px 30px rgba(255,177,63,.30)}}
+  .choice-grid{display:grid;gap:9px}.choice{border:1px solid #415486;background:#18254a;border-radius:14px;padding:10px 12px;cursor:pointer;line-height:1.35}.choice:hover{border-color:#7f9ee6}.choice.selected{outline:2px solid var(--accent);background:#2e3550}
+  .mini{font-size:12px;color:var(--muted)}
+  .observation{display:grid;gap:7px;max-height:170px;overflow:auto}.obs{font-size:12px;padding:8px 10px;border-radius:11px;background:#13213d;border-left:3px solid var(--accent2);color:#dce8ff}
+  .row{display:flex;gap:8px;flex-wrap:wrap}.seg{flex:1;min-width:110px;background:#111b36;padding:10px;border-radius:12px}.seg label{display:block;font-size:12px;color:#c6d1ee;margin-bottom:6px}.seg input{width:100%}
+  .footer-nav{display:flex;gap:8px;margin-top:auto}.footer-nav .btn{text-align:center;flex:1}
+  .toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,20px);opacity:0;background:#111a30;color:white;border:1px solid #51679c;border-radius:999px;padding:10px 15px;transition:.25s;z-index:9;pointer-events:none}.toast.show{opacity:1;transform:translate(-50%,0)}
+  .legend{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:#c7d2ef}.legend span{display:inline-flex;align-items:center;gap:5px}.sw{width:12px;height:4px;border-radius:3px;background:#ffe179}.sw.blue{background:#5ad8ff}.sw.dark{background:#111}
+  .challenge{background:#131d3a;border-radius:14px;padding:12px;border:1px solid rgba(255,255,255,.08);font-size:13px;line-height:1.5}
+  .result{background:linear-gradient(135deg,rgba(95,221,174,.14),rgba(99,214,255,.1));border:1px solid rgba(113,224,168,.35);padding:12px;border-radius:14px;line-height:1.55}
+  .hidden{display:none!important}
+  @media(max-width:900px){.layout{grid-template-columns:1fr}.side{min-height:auto}.scene-wrap{min-height:520px}.topbar{grid-template-columns:1fr}.progress{justify-content:flex-start}}
+
+  .status-line{background:#12203d;border:1px solid #4d679a;border-radius:14px;padding:10px 12px;font-size:13px;line-height:1.45;color:#eaf2ff}
+  .status-line.good{border-color:#3f9d78;background:#132d28;color:#dfffee}
+  .status-line.bad{border-color:#b65f6d;background:#351c29;color:#ffe7eb}
+  .range-value{float:right;color:#ffe074;font-weight:900;font-variant-numeric:tabular-nums}
+  .surface-note{background:#151d35;border:1px solid #54658e;border-left:4px solid #ffd45c;border-radius:14px;padding:11px 12px;font-size:13px;line-height:1.55;color:#dbe6ff}
+  .cta-guide{font-size:13px;color:#ffe9a6;text-align:center;padding:7px 8px;border-radius:11px;background:rgba(255,212,92,.08);border:1px dashed rgba(255,212,92,.45)}
+  .validation-result{border-radius:14px;padding:12px;font-size:13px;line-height:1.55}
+  .validation-result.pass{background:#153229;border:1px solid #3c9b74;color:#e3fff1}
+  .validation-result.fail{background:#351e28;border:1px solid #a65e6a;color:#ffe9ed}
+  #scene [data-drag]{touch-action:none}
+  input[type="range"]{accent-color:#ffd45c;cursor:ew-resize}
+  .celebration{position:fixed;inset:0;z-index:100;display:grid;place-items:center;background:rgba(5,10,25,.76);backdrop-filter:blur(8px);padding:18px}.celebrate-card{position:relative;z-index:2;width:min(620px,94vw);background:linear-gradient(180deg,#24345f,#131d3a);border:2px solid rgba(255,225,117,.75);border-radius:26px;padding:28px;box-shadow:0 28px 90px rgba(0,0,0,.48);text-align:center}.celebrate-card h2{margin:0 0 8px;font-size:30px}.celebrate-card p{color:#dce7ff;line-height:1.65}.reflection-prompt{margin:16px 0;background:#101a36;border:1px solid #43598c;border-radius:16px;padding:14px;text-align:left;line-height:1.6}.record-controls{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}.record-btn{border:0;border-radius:16px;padding:13px 18px;font-weight:900;cursor:pointer;background:linear-gradient(135deg,#ffcf4f,#ffb13f);color:#2d2000}.record-btn.stop{background:#ff8793;color:#281116}.record-btn.secondary{background:#2d4076;color:white}.record-state{margin-top:10px;color:#bcd0ff;font-size:13px;min-height:20px}.record-playback{width:100%;margin-top:12px}.confetti-layer{position:absolute;inset:0;overflow:hidden;pointer-events:none}.confetti{position:absolute;top:-30px;width:10px;height:18px;border-radius:3px;animation:confettiFall linear forwards}.confetti:nth-child(5n+1){background:#ffd45c}.confetti:nth-child(5n+2){background:#63d6ff}.confetti:nth-child(5n+3){background:#71e0a8}.confetti:nth-child(5n+4){background:#ff8f9b}.confetti:nth-child(5n){background:#d7a6ff}@keyframes confettiFall{0%{transform:translateY(-40px) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:.9}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="brand"><div class="bot-face">AI</div><div><h1>小光实验室：为什么会有影子？</h1><div class="sub">9–12 岁 · 从观察、猜想、实验到科学模型</div></div></div>
+    <div class="progress-area"><div class="progress" id="progress" aria-label="学习进度"></div><div class="nav-tip hidden" id="navTip"><strong>回顾模式已开启</strong><br>现在可以点击右上角任意黄色圆点，快速回顾对应的 8 个内容。<button id="navTipOk">我知道了</button></div></div>
+  </div>
+
+  <div class="layout">
+    <section class="stage-card">
+      <div class="stage-head"><div class="stage-title" id="stageTitle"></div><div class="stage-chip" id="stageChip"></div></div>
+      <div class="scene-wrap" id="sceneWrap">
+        <div class="stars"></div>
+        <svg id="scene" viewBox="0 0 900 560" preserveAspectRatio="xMidYMid meet" aria-label="互动影子实验场景"></svg>
+        <div class="scene-ui"><div class="objective" id="objective"></div><div class="science-badge" id="modeBadge">故事模式</div></div>
+      </div>
+    </section>
+
+    <aside class="side">
+      <div class="talk"><div class="name">🤖 小光</div><p id="talkText"></p></div>
+      <div id="statusLine" class="status-line hidden"></div>
+      <div id="hintBox" class="hidden challenge"></div>
+      <div id="dynamicPanel"></div>
+      <div class="footer-nav"><button class="btn" id="prevBtn">← 上一步</button><button class="btn" id="hintBtn">需要提示</button><button class="btn primary" id="nextBtn">继续探索 →</button></div>
+    </aside>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<div class="celebration hidden" id="celebration" role="dialog" aria-modal="true" aria-labelledby="celebrateTitle">
+  <div class="confetti-layer" id="confettiLayer"></div>
+  <div class="celebrate-card">
+    <h2 id="celebrateTitle">🎉 影子探索完成！</h2>
+    <p>你已经从观察、猜想、实验一路走到迁移挑战。最后不要背答案，试着用自己的话把发现讲出来。</p>
+    <div class="reflection-prompt"><strong>可以说这 3 件事：</strong><br>1. 影子为什么会出现？<br>2. 改变光源、物体或位置时，影子会怎样变化？<br>3. 今天哪个实验最让你意外？为什么？</div>
+    <div class="record-controls">
+      <button class="record-btn" id="recordBtn">🎙 开始录音</button>
+      <button class="record-btn stop hidden" id="stopRecordBtn">■ 停止录音</button>
+      <button class="record-btn secondary" id="closeCelebration">回顾 8 个内容</button>
+    </div>
+    <div class="record-state" id="recordState">点击“开始录音”，用自己的话讲一遍。</div>
+    <audio id="recordPlayback" class="record-playback hidden" controls></audio>
+  </div>
+</div>
+
+<script>
+const svg = document.getElementById('scene');
+const panel = document.getElementById('dynamicPanel');
+const titleEl = document.getElementById('stageTitle');
+const chipEl = document.getElementById('stageChip');
+const objectiveEl = document.getElementById('objective');
+const talkEl = document.getElementById('talkText');
+const modeBadge = document.getElementById('modeBadge');
+const statusLine = document.getElementById('statusLine');
+
+const FLOOR_Y = 405;
+const ROBOT_Y = 349;
+const ROBOT_W = 62;
+const ROBOT_H = 108;
+
+const S = {
+  stage: 0,
+  lampOn: false,
+  rays: false,
+  robotX: 420,
+  wallX: 790,
+  lampX: 120,
+  brightness: 1,
+  sourceSize: 18,
+  observations: [],
+  hypothesis: null,
+  material: 'opaque',
+  challenge: 0,
+  streetPersonX: 430,
+  twoLampRight: true,
+  wallVisible: true,
+  surfaceType: 'wall',
+  validationHypothesis: null,
+  validationResult: null,
+  lastChange: '',
+  streetDone: false,
+  tutorialActive: true,
+  tutorialStep: 0,
+  tutorialSeen: Array(8).fill(false),
+  eclipseMode: 'solar',
+  eclipseMoonX: 455,
+  eclipseMoonY: 280,
+  eclipseAngle: -Math.PI/2,
+  solarDone: false,
+  lunarDone: false,
+  explorationComplete: false,
+  reviewUnlocked: false
+};
+
+const stages = [
+  {title:'1. 奇怪的影子',chip:'发现现象',mode:'故事模式',obj:'先<strong>打开灯</strong>。灯架、小光都可以按住连续拖动；右侧滑杆也能精确移动。观察墙面与地面上的影子。',talk:'先别急着解释“为什么”。把灯打开，再移动灯架或小光，看看影子的哪一部分发生变化。'},
+  {title:'2. 自由调查',chip:'改变变量',mode:'实验模式',obj:'一次只改变一个变量：<strong>光源位置、小光位置、墙面位置、亮度</strong>。收集至少 3 条规律。',talk:'一次只改一个条件。墙上的影子高度和地面上的影子长度会分别标出来，不用靠弹窗猜哪里变了。'},
+  {title:'3. 提出假设',chip:'先猜再证',mode:'思考模式',obj:'选择你目前最相信的解释。下一步会<strong>只验证你选中的这一条假设</strong>。如果实验不支持它，就回来重选。',talk:'先形成自己的解释，再让实验来攻击它。选错没关系，但必须用结果修正。'},
+  {title:'4. 实验验证',chip:'验证你的选择',mode:'实验模式',obj:'先看“如果这条假设是真的，应该发生什么”，再点击右侧醒目的<strong>执行实验</strong>按钮。',talk:'这一步不会验证别的选项，只检验你刚才选中的解释。实验不支持就重选；支持则直接进入科学透视。'},
+  {title:'5. 科学透视',chip:'看见不可见',mode:'科学透视模式',obj:'沿着光路观察：哪些光能继续到达承影面，哪些光被小光挡住。',talk:'重点看光路有没有被遮挡：没有碰到小光的光继续前进，碰到小光的那部分光到不了后方。'},
+  {title:'6. 影子为什么变大变小？',chip:'空间关系',mode:'实验模式',obj:'移动<strong>灯、小光和墙面</strong>，观察黄色尺寸标记怎样变化。',talk:'不要只记“靠近就变大”。实际要看光源、遮挡物和承影面三者的位置关系。'},
+  {title:'7. 为什么边缘有时模糊？',chip:'光源大小',mode:'进阶实验',obj:'调节<strong>光源大小</strong>，只观察影子边缘：什么时候更清晰，什么时候会出现浅浅的过渡？',talk:'这里不需要记新名词。只要发现：光源很小时边缘更清楚；光源变大后，边缘会逐渐变模糊。'},
+  {title:'8. 迁移挑战',chip:'用模型解决新问题',mode:'挑战模式',obj:'把“找光源 → 找遮挡 → 判断哪里收不到直接光”的模型用到路灯、多光源，以及<strong>白天的日全食 / 夜晚的月食</strong>。',talk:'挑战 3 让月球沿地球轨道转动。白天观察月球怎样运行到太阳与地球之间形成日食；夜晚观察月球怎样运行到地球背后并进入地球影子形成月食。'}
+];
+
+const hypothesisLabels = [
+  '影子是物体自己发出的黑色图像',
+  '只有墙会把物体复制成黑色图案',
+  '物体挡住了一部分原本会到达表面的光',
+  '灯会主动把物体的黑色轮廓画到墙上'
+];
+
+const validationInfo = [
+  {
+    title:'验证 A：关掉光源',
+    prediction:'如果黑色图像是物体自己产生的，那么把灯关掉以后，这块黑色图像应该仍然存在。',
+    action:'关掉灯看看',
+    result:'灯一关，墙面和地面上的影子都消失了。影子依赖外来的光，不是物体自己发出的黑色图像。',
+    pass:false
+  },
+  {
+    title:'验证 B：更换承影表面',
+    prediction:'如果只有“墙”会复制物体，那么把墙换成普通白纸屏后，不应该出现同样的暗影。',
+    action:'换成白纸屏',
+    result:'换成白纸屏后，影子仍然出现。表面只是把明暗差异显示出来，并不是墙在复制物体。',
+    pass:false
+  },
+  {
+    title:'验证 C：直接看光路',
+    prediction:'如果影子来自“挡住一部分光”，那么显示光路后，小光正后方应该缺少能直接到达墙面的光。',
+    action:'显示光路验证',
+    result:'验证通过：碰到小光的光被挡住；旁边的光继续到达墙面。较暗区域正好出现在缺少直达光的位置。',
+    pass:true
+  },
+  {
+    title:'验证 D：外形不变，只改透明度',
+    prediction:'如果灯是在主动“画轮廓”，那么物体外形不变时，换成透明材料后应该仍画出同样深的黑色轮廓。',
+    action:'换成透明材料',
+    result:'外形没有变，但透明以后影子明显变弱。关键不是灯在画轮廓，而是材料到底挡住了多少光。',
+    pass:false
+  }
+];
+
+function progress(){
+  const p=document.getElementById('progress');
+  p.innerHTML='';
+  p.setAttribute('aria-label',S.reviewUnlocked?'章节快速导航':'学习进度（完成全部内容后可解锁回顾导航）');
+  stages.forEach((st,i)=>{
+    const d=document.createElement('button');
+    d.type='button';
+    d.className='dot '+(i<=S.stage?'on ':'')+(i===S.stage?'current':'');
+    const stageName=st.title.replace(/^\d+\.\s*/, '');
+    if(S.reviewUnlocked){
+      d.title=`跳转到第 ${i+1} 部分：${stageName}`;
+      d.setAttribute('aria-label',d.title);
+      d.onclick=()=>jumpToStage(i);
+    }else{
+      d.disabled=true;
+      d.title=`第 ${i+1} 部分：${stageName}。完成全部 8 个内容后可解锁快速回顾。`;
+      d.setAttribute('aria-label',d.title);
+    }
+    p.appendChild(d);
+  });
+}
+
+let statusTimer=null;
+function showStatus(t,type='info',duration=0){
+  clearTimeout(statusTimer);
+  statusLine.textContent=t;
+  statusLine.className='status-line '+type;
+  statusLine.classList.remove('hidden');
+  if(duration) statusTimer=setTimeout(()=>statusLine.classList.add('hidden'),duration);
+}
+function clearStatus(){clearTimeout(statusTimer);statusLine.classList.add('hidden');}
+
+function addObs(t){
+  if(!S.observations.includes(t)){
+    S.observations.push(t);
+    if(S.stage===1) renderPanel();
+  }
+}
+
+function svgEl(tag,attrs={}){
+  const e=document.createElementNS('http://www.w3.org/2000/svg',tag);
+  for(const [k,v] of Object.entries(attrs)) e.setAttribute(k,v);
+  return e;
+}
+function clear(){svg.innerHTML='';}
+function text(x,y,t,size=18,fill='#fff',anchor='middle',weight='700'){
+  const e=svgEl('text',{x,y,fill,'font-size':size,'text-anchor':anchor,'font-weight':weight});
+  e.textContent=t;svg.appendChild(e);return e;
+}
+function initDefs(){
+  const defs=svgEl('defs');
+  const marker=svgEl('marker',{id:'arrowHead',viewBox:'0 0 10 10',refX:'9',refY:'5',markerWidth:'7',markerHeight:'7',orient:'auto-start-reverse'});
+  marker.appendChild(svgEl('path',{d:'M 0 0 L 10 5 L 0 10 z',fill:'#ffd45c'}));
+  defs.appendChild(marker);
+  svg.appendChild(defs);
+}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+
+function wrapSvgLines(label,w,fontSize=13){
+  const maxUnits=Math.max(8,(w-26)/(fontSize*0.95));
+  const lines=[];let line='';let units=0;
+  const unitOf=ch=>/^[\x00-\xff]$/.test(ch)?0.56:1;
+  for(const ch of label){
+    if(ch==='\n'){lines.push(line);line='';units=0;continue;}
+    const u=unitOf(ch);
+    if(line && units+u>maxUnits){lines.push(line);line=ch;units=u;}
+    else{line+=ch;units+=u;}
+  }
+  if(line) lines.push(line);
+  return lines;
+}
+function routedArrow(sx,sy,tx,ty,side='right'){
+  let points='';
+  if(side==='right'||side==='left'){
+    const midX=sx+(tx-sx)*0.55;
+    points=`${sx},${sy} ${midX},${sy} ${midX},${ty} ${tx},${ty}`;
+  }else{
+    const midY=sy+(ty-sy)*0.55;
+    points=`${sx},${sy} ${sx},${midY} ${tx},${midY} ${tx},${ty}`;
+  }
+  svg.appendChild(svgEl('polyline',{points,fill:'none',stroke:'#ffd45c','stroke-width':2.4,'stroke-linecap':'round','stroke-linejoin':'round','marker-end':'url(#arrowHead)'}));
+}
+function drawCallout(x,y,w,label,targetX,targetY,opts={}){
+  const fontSize=opts.fontSize||13;
+  const lines=wrapSvgLines(label,w,fontSize);
+  const hasButton=!!opts.button;
+  const h=18+lines.length*(fontSize+6)+(hasButton?40:8);
+  x=clamp(x,12,888-w);y=clamp(y,92,548-h);
+  const side=opts.side||((targetX>x+w)?'right':(targetX<x?'left':(targetY>y+h?'bottom':'top')));
+  let sx,sy;
+  if(side==='right'){sx=x+w;sy=y+h/2;}
+  else if(side==='left'){sx=x;sy=y+h/2;}
+  else if(side==='bottom'){sx=x+w/2;sy=y+h;}
+  else{sx=x+w/2;sy=y;}
+  routedArrow(sx,sy,targetX,targetY,side);
+  const g=svgEl('g');
+  g.appendChild(svgEl('rect',{x,y,width:w,height:h,rx:13,fill:'#101a36',stroke:'#ffd45c','stroke-width':1.6,opacity:.97}));
+  lines.forEach((ln,i)=>{
+    const t=svgEl('text',{x:x+13,y:y+24+i*(fontSize+6),fill:'#fff4bd','font-size':fontSize,'font-weight':'800'});
+    t.textContent=ln;g.appendChild(t);
+  });
+  if(hasButton){
+    const by=y+h-33,bw=86,bx=x+w-bw-10;
+    const btn=svgEl('g',{'data-guide-next':'1',cursor:'pointer'});
+    btn.appendChild(svgEl('rect',{x:bx,y:by,width:bw,height:25,rx:12,fill:'#ffd45c'}));
+    const bt=svgEl('text',{x:bx+bw/2,y:by+17,fill:'#2b2100','font-size':12,'text-anchor':'middle','font-weight':'900'});bt.textContent='我知道了';btn.appendChild(bt);
+    g.appendChild(btn);
+  }
+  svg.appendChild(g);
+  return {x,y,w,h};
+}
+
+function shadowGeometry(sx,ly,rx,ry,rw,rh,wx){
+  const top={x:rx,y:ry-rh/2},bot={x:rx,y:ry+rh/2};
+  const denTop=Math.max(1,top.x-sx),denBot=Math.max(1,bot.x-sx);
+  const yt=ly+(top.y-ly)*(wx-sx)/denTop;
+  const yb=ly+(bot.y-ly)*(wx-sx)/denBot;
+  return {yt,yb,h:Math.abs(yb-yt),cy:(yt+yb)/2};
+}
+function sourceX(){return S.lampX+45;}
+function currentGeometry(){return shadowGeometry(sourceX(),265,S.robotX,ROBOT_Y,ROBOT_W,ROBOT_H,S.wallX-9);}
+function shadowMetrics(){
+  const sx=sourceX(),ly=265,rx=S.robotX,wx=S.wallX-9;
+  const g=currentGeometry();
+  const wallTop=clamp(g.yt,98,FLOOR_Y);
+  const wallBottom=clamp(g.yb,98,FLOOR_Y);
+  const wallH=Math.max(0,wallBottom-wallTop);
+  const objTopY=ROBOT_Y-ROBOT_H/2;
+  const dy=Math.max(1,objTopY-ly);
+  const groundEnd=sx+(FLOOR_Y-ly)*(rx-sx)/dy;
+  const floorStart=rx+ROBOT_W/2-4;
+  const floorEnd=Math.min(wx,groundEnd);
+  const floorLen=Math.max(0,floorEnd-floorStart);
+  return {g,wallTop,wallBottom,wallH,floorStart,floorEnd,floorLen,theoreticalH:g.h};
+}
+function describeMetricChange(base,after,subject){
+  const wd=after.wallH-base.wallH,fd=after.floorLen-base.floorLen;
+  const parts=[];
+  if(Math.abs(wd)>=3) parts.push(`墙上影子${wd>0?'变高':'变矮'} ${Math.round(base.wallH)}→${Math.round(after.wallH)}`);
+  if(Math.abs(fd)>=5) parts.push(`地面影子${fd>0?'变长':'变短'} ${Math.round(base.floorLen)}→${Math.round(after.floorLen)}`);
+  if(!parts.length) return `看这里：${subject}这次移动很小，影子边界变化也很小`;
+  return `看这里：${parts.join('；')}`;
+}
+function clampPositions(){
+  S.lampX=clamp(S.lampX,70,255);
+  S.robotX=clamp(S.robotX,S.lampX+155,S.wallX-110);
+  S.wallX=clamp(S.wallX,S.robotX+110,855);
+}
+function updatePosition(kind,x,y=null,baseline=null){
+  if(kind==='street'){
+    S.streetPersonX=clamp(x,310,770);
+    S.lastChange='看黄色地面标尺：人物位置改变了影子长度';
+    return;
+  }
+  if(kind==='moon'){
+    if(S.eclipseMode==='solar') S.eclipseMoonX=clamp(x,255,615);
+    else S.eclipseMoonX=clamp(x,535,825);
+    S.eclipseMoonY=clamp(y??S.eclipseMoonY,175,385);
+    return;
+  }
+  const before=baseline||shadowMetrics();
+  if(kind==='lamp') S.lampX=x;
+  if(kind==='robot') S.robotX=x;
+  if(kind==='wall') S.wallX=x;
+  clampPositions();
+  const after=shadowMetrics();
+  const label=kind==='lamp'?'光源位置':kind==='robot'?'小光位置':'墙面位置';
+  S.lastChange=describeMetricChange(before,after,label);
+}
+
+function drawDragBadge(x,y,label,icon='↔'){
+  const g=svgEl('g',{opacity:.94});
+  g.appendChild(svgEl('rect',{x:x-47,y:y-15,width:94,height:26,rx:12,fill:'#17264b',stroke:'#5fa9d8'}));
+  const t=svgEl('text',{x,y:y+3,fill:'#bdeaff','font-size':11,'text-anchor':'middle','font-weight':'800'});t.textContent=icon+' '+label;g.appendChild(t);svg.appendChild(g);
+}
+function drawRays(sx,ly,rx,ry,rw,rh,wx){
+  const ys=[115,150,185,220,255,290,325,360,395];
+  ys.forEach(targetY=>{
+    const t=(rx-sx)/(wx-sx);
+    const yAtRobot=ly+(targetY-ly)*t;
+    const blocked=yAtRobot>ry-rh/2&&yAtRobot<ry+rh/2;
+    const endX=blocked?rx-rw/2:wx-10;
+    const endY=ly+(targetY-ly)*(endX-sx)/(wx-sx);
+    svg.appendChild(svgEl('line',{x1:sx,y1:ly,x2:endX,y2:endY,stroke:blocked?'#ffdf67':'#68d9ff','stroke-width':blocked?2.8:1.7,opacity:blocked?.92:.68,'stroke-dasharray':blocked?'':'5 5'}));
+    if(blocked) svg.appendChild(svgEl('circle',{cx:endX,cy:endY,r:3.5,fill:'#ffdf67'}));
+  });
+  // 边界线只作为几何参照，明确画成虚线，不表示光穿过物体。
+  const m=shadowMetrics();
+  const topX=rx+rw/2,topY=ry-rh/2;
+  svg.appendChild(svgEl('line',{x1:topX,y1:topY,x2:wx-10,y2:m.g.yt,stroke:'#ffd45c','stroke-width':1.6,'stroke-dasharray':'7 6',opacity:.72}));
+}
+function drawDimension(x1,y1,x2,y2,label,orientation='h'){
+  svg.appendChild(svgEl('line',{x1,y1,x2,y2,stroke:'#ffd45c','stroke-width':2}));
+  if(orientation==='v'){
+    svg.appendChild(svgEl('line',{x1:x1-6,y1,x2:x1+6,y2:y1,stroke:'#ffd45c','stroke-width':2}));
+    svg.appendChild(svgEl('line',{x1:x2-6,y1:y2,x2:x2+6,y2:y2,stroke:'#ffd45c','stroke-width':2}));
+    const pillY=(y1+y2)/2-12;
+    svg.appendChild(svgEl('rect',{x:x1-68,y:pillY,width:58,height:24,rx:10,fill:'#111a35',stroke:'#ffd45c'}));
+    text(x1-39,pillY+16,label,11,'#ffe991','middle','800');
+  }else{
+    svg.appendChild(svgEl('line',{x1,y1:y1-5,x2:x1,y2:y1+5,stroke:'#ffd45c','stroke-width':2}));
+    svg.appendChild(svgEl('line',{x1:x2,y1:y2-5,x2:x2,y2:y2+5,stroke:'#ffd45c','stroke-width':2}));
+    const cx=(x1+x2)/2;
+    svg.appendChild(svgEl('rect',{x:cx-43,y:y1+8,width:86,height:24,rx:10,fill:'#111a35',stroke:'#ffd45c'}));
+    text(cx,y1+24,label,11,'#ffe991','middle','800');
+  }
+}
+function drawShadowCue(m,wx){
+  if(!S.lampOn||!S.wallVisible) return;
+  if(m.wallH>5) drawDimension(wx-48,m.wallTop,wx-48,m.wallBottom,`墙上 ${Math.round(m.wallH)}`,'v');
+  if(m.floorLen>8) drawDimension(m.floorStart,FLOOR_Y+18,m.floorEnd,FLOOR_Y+18,`地面 ${Math.round(m.floorLen)}`,'h');
+  if(S.lastChange&&!S.tutorialActive){
+    const ty=m.wallH>5?(m.wallTop+m.wallBottom)/2:FLOOR_Y+5;
+    drawCallout(Math.max(330,wx-350),118,275,S.lastChange,wx-25,ty,{side:'right'});
+  }
+}
+
+function drawLab(opts={}){
+  clear();initDefs();
+  const ly=265,rx=S.robotX,ry=ROBOT_Y,rw=ROBOT_W,rh=ROBOT_H,wx=S.wallX,lx=S.lampX,sx=sourceX();
+  svg.appendChild(svgEl('rect',{x:0,y:FLOOR_Y,width:900,height:155,fill:'#2a213c'}));
+  svg.appendChild(svgEl('line',{x1:0,y1:FLOOR_Y,x2:900,y2:FLOOR_Y,stroke:'#70587d','stroke-width':2}));
+  [438,478,522].forEach(y=>svg.appendChild(svgEl('line',{x1:0,y1:y,x2:900,y2:y,stroke:'#8b7396','stroke-width':1,opacity:.12})));
+  text(55,452,'地面',12,'#8f86a8','start','600');
+
+  const m=shadowMetrics(),g=m.g;
+  let shadowOpacity=.58*Math.min(1.15,S.brightness);
+  if(S.material==='frosted') shadowOpacity=.26*Math.min(1.15,S.brightness);
+  if(S.material==='glass') shadowOpacity=.075*Math.min(1.15,S.brightness);
+
+  // 地面影子只画在地面表面附近，不再画成“钻入地下”的长椭圆/楔形。
+  if(S.lampOn&&S.wallVisible&&opts.shadow!==false&&m.floorLen>4){
+    svg.appendChild(svgEl('polygon',{points:`${m.floorStart},${FLOOR_Y+1} ${m.floorEnd},${FLOOR_Y+1} ${Math.max(m.floorStart,m.floorEnd-16)},${FLOOR_Y+16} ${m.floorStart+14},${FLOOR_Y+11}`,fill:'#07090f',opacity:shadowOpacity*.76}));
+  }
+
+  if(S.wallVisible){
+    const wall=svgEl('g',{'data-drag':opts.draggableWall===false?'':'wall',cursor:opts.draggableWall===false?'default':'ew-resize'});
+    const wallFill=S.surfaceType==='paper'?'#f1ead8':'#d6e0f3';
+    wall.appendChild(svgEl('rect',{x:wx-18,y:88,width:58,height:FLOOR_Y-88+24,fill:'transparent','pointer-events':'all'}));
+    wall.appendChild(svgEl('rect',{x:wx-14,y:98,width:34,height:FLOOR_Y-98,rx:6,fill:wallFill}));
+    wall.appendChild(svgEl('rect',{x:wx+20,y:112,width:15,height:FLOOR_Y-112,fill:'#7581a6',opacity:.38}));
+    wall.appendChild(svgEl('circle',{cx:wx-4,cy:FLOOR_Y+7,r:6,fill:'#78829c'}));
+    wall.appendChild(svgEl('circle',{cx:wx+15,cy:FLOOR_Y+7,r:6,fill:'#78829c'}));
+    svg.appendChild(wall);
+
+    if(S.lampOn&&opts.shadow!==false&&m.wallH>2){
+      const defs=svg.querySelector('defs');
+      const clip=svgEl('clipPath',{id:'wallShadowClip'});
+      clip.appendChild(svgEl('rect',{x:wx-17,y:98,width:40,height:FLOOR_Y-98}));defs.appendChild(clip);
+      svg.appendChild(svgEl('ellipse',{cx:wx+1,cy:(m.wallTop+m.wallBottom)/2,rx:25,ry:Math.max(8,m.wallH/2),fill:'#07090f',opacity:shadowOpacity,'clip-path':'url(#wallShadowClip)'}));
+    }
+  }
+
+  if(S.lampOn&&(S.rays||opts.forceRays)) drawRays(sx,ly,rx,ry,rw,rh,wx);
+
+  // 光源：把整个灯架与底座都设为同一个大拖动热区。
+  const lamp=svgEl('g',{'data-drag':opts.draggableLamp===false?'':'lamp',cursor:opts.draggableLamp===false?'default':'ew-resize'});
+  lamp.appendChild(svgEl('rect',{x:lx-54,y:ly-38,width:118,height:FLOOR_Y-ly+48,fill:'transparent','pointer-events':'all'}));
+  lamp.appendChild(svgEl('line',{x1:lx-10,y1:ly+18,x2:lx-10,y2:FLOOR_Y-12,stroke:'#647395','stroke-width':7}));
+  lamp.appendChild(svgEl('rect',{x:lx-42,y:FLOOR_Y-15,width:64,height:12,rx:6,fill:'#596988'}));
+  lamp.appendChild(svgEl('rect',{x:lx-42,y:ly-20,width:55,height:40,rx:12,fill:'#55658b'}));
+  lamp.appendChild(svgEl('path',{d:`M ${lx+8} ${ly-15} L ${lx+45} ${ly-30} L ${lx+45} ${ly+30} L ${lx+8} ${ly+15} Z`,fill:S.lampOn?'#ffe47d':'#7180a5'}));
+  if(S.lampOn) lamp.appendChild(svgEl('circle',{cx:sx,cy:ly,r:7,fill:'#fff7b3'}));
+  svg.appendChild(lamp);
+
+  const robot=svgEl('g',{'data-drag':'robot',cursor:'ew-resize'});
+  robot.appendChild(svgEl('rect',{x:rx-rw/2-14,y:ry-rh/2-36,width:rw+28,height:rh+46,fill:'transparent','pointer-events':'all'}));
+  const bodyOpacity=S.material==='glass'?.25:S.material==='frosted'?.62:1;
+  robot.appendChild(svgEl('rect',{x:rx-rw/2,y:ry-rh/2,width:rw,height:rh,rx:18,fill:'#78d9ff',opacity:bodyOpacity,stroke:'#d7f6ff','stroke-width':3}));
+  robot.appendChild(svgEl('rect',{x:rx-22,y:ry-rh/2-28,width:44,height:34,rx:13,fill:'#9ce7ff',opacity:Math.max(.45,bodyOpacity)}));
+  robot.appendChild(svgEl('circle',{cx:rx-9,cy:ry-rh/2-12,r:4,fill:'#15223c'}));
+  robot.appendChild(svgEl('circle',{cx:rx+9,cy:ry-rh/2-12,r:4,fill:'#15223c'}));
+  robot.appendChild(svgEl('line',{x1:rx-14,y1:ry+rh/2-1,x2:rx-18,y2:FLOOR_Y,stroke:'#83dcff','stroke-width':8,'stroke-linecap':'round',opacity:Math.max(.45,bodyOpacity)}));
+  robot.appendChild(svgEl('line',{x1:rx+14,y1:ry+rh/2-1,x2:rx+18,y2:FLOOR_Y,stroke:'#83dcff','stroke-width':8,'stroke-linecap':'round',opacity:Math.max(.45,bodyOpacity)}));
+  svg.appendChild(robot);
+
+  if(opts.labels){
+    text(lx,205,'光源',14,'#ffe681');
+    text(rx,255,S.material==='glass'?'透明遮挡物':'遮挡物',14,'#8fe5ff');
+    if(S.wallVisible) text(wx,76,S.surfaceType==='paper'?'白纸屏':'墙面 / 承影屏',14,'#d9e7ff');
+  }
+  if(opts.dragHints!==false&&!S.tutorialActive){
+    drawDragBadge(lx-10,FLOOR_Y-38,'拖灯架');
+    drawDragBadge(rx,270,'拖小光');
+    if(S.wallVisible&&opts.draggableWall!==false) drawDragBadge(wx-8,72,'拖墙面');
+  }
+  if(S.lampOn&&S.wallVisible&&opts.shadowCue!==false) drawShadowCue(m,wx);
+  if(opts.validationMark==='pass') drawCallout(485,150,275,'正后方缺少直达光：这正是“遮挡”模型的预测。',rx+45,320,{side:'bottom'});
+  if(opts.validationMark==='glass') drawCallout(445,150,290,'外形没变，但透明后影子明显变弱。',wx-25,315,{side:'right'});
+  if(opts.validationMark==='off') drawCallout(455,150,270,'灯关掉后，墙上和地面的影子一起消失。',wx-25,320,{side:'right'});
+  if(opts.validationMark==='paper') drawCallout(455,150,280,'换成白纸屏，影子仍然出现。',wx-25,315,{side:'right'});
+}
+
+function drawPenumbra(){
+  clear();initDefs();
+  const lx=150,rx=430,wx=780,ry=300,rh=120,rw=64;
+  svg.appendChild(svgEl('rect',{x:0,y:420,width:900,height:140,fill:'#29213d'}));
+  svg.appendChild(svgEl('rect',{x:wx,y:90,width:24,height:330,fill:'#dce6f5'}));
+
+  // 左侧光源可以直接拉伸。上下黄色手柄和右侧滑杆使用同一个 S.sourceSize。
+  const srcTop=260-S.sourceSize*2.4,srcBottom=260+S.sourceSize*2.4;
+  svg.appendChild(svgEl('rect',{x:lx-12,y:srcTop,width:24,height:Math.max(10,srcBottom-srcTop),rx:10,fill:'#ffe276'}));
+  const topHandle=svgEl('g',{'data-drag':'sourceTop',cursor:'ns-resize'});
+  topHandle.appendChild(svgEl('rect',{x:lx-30,y:srcTop-16,width:60,height:32,fill:'transparent','pointer-events':'all'}));
+  topHandle.appendChild(svgEl('circle',{cx:lx,cy:srcTop,r:7,fill:'#fff3ad',stroke:'#ffd45c','stroke-width':2}));
+  svg.appendChild(topHandle);
+  const bottomHandle=svgEl('g',{'data-drag':'sourceBottom',cursor:'ns-resize'});
+  bottomHandle.appendChild(svgEl('rect',{x:lx-30,y:srcBottom-16,width:60,height:32,fill:'transparent','pointer-events':'all'}));
+  bottomHandle.appendChild(svgEl('circle',{cx:lx,cy:srcBottom,r:7,fill:'#fff3ad',stroke:'#ffd45c','stroke-width':2}));
+  svg.appendChild(bottomHandle);
+  if(!S.tutorialActive) drawDragBadge(lx+68,260,'上下拉伸光源','↕');
+
+  svg.appendChild(svgEl('rect',{x:rx-rw/2,y:ry-rh/2,width:rw,height:rh,rx:18,fill:'#79dcff'}));
+  const topSrc=260-S.sourceSize*2.2,botSrc=260+S.sourceSize*2.2,topObj=ry-rh/2,botObj=ry+rh/2;
+  const lines=[[topSrc,topObj],[topSrc,botObj],[botSrc,topObj],[botSrc,botObj]];let ys=[];
+  lines.forEach(([sy,oy],i)=>{const wallY=sy+(oy-sy)*(wx-lx)/(rx-lx);ys.push(wallY);svg.appendChild(svgEl('line',{x1:lx,y1:sy,x2:wx,y2:wallY,stroke:i%2?'#6edbff':'#ffdf6c','stroke-width':2,opacity:.78}));});
+  ys.sort((a,b)=>a-b);
+  const penTop=ys[0],umTop=ys[1],umBot=ys[2],penBot=ys[3];
+  svg.appendChild(svgEl('rect',{x:wx-12,y:penTop,width:12,height:Math.max(0,penBot-penTop),fill:'#222',opacity:.28}));
+  svg.appendChild(svgEl('rect',{x:wx-12,y:umTop,width:12,height:Math.max(0,umBot-umTop),fill:'#050505',opacity:.82}));
+  text(wx-45,(umTop+umBot)/2,'较暗',13,'#fff','end');
+  text(wx-45,penTop+18,'模糊过渡',12,'#c4eaff','end');
+  drawDimension(wx-32,penTop,wx-32,umTop,'过渡区','v');
+}
+function streetShadowData(){
+  const x=S.streetPersonX,lightX=260,lightY=150,objTopY=297,groundY=400;
+  const shadowEnd=lightX+(x-lightX)*(groundY-lightY)/(objTopY-lightY);
+  return {x,shadowEnd,len:Math.abs(shadowEnd-x)};
+}
+function drawStreetChallenge(){
+  clear();initDefs();
+  svg.appendChild(svgEl('rect',{x:0,y:400,width:900,height:160,fill:'#26213b'}));
+  svg.appendChild(svgEl('line',{x1:0,y1:400,x2:900,y2:400,stroke:'#615673','stroke-width':3}));
+  svg.appendChild(svgEl('rect',{x:170,y:135,width:12,height:265,fill:'#7e8aa4'}));
+  svg.appendChild(svgEl('path',{d:'M176 145 Q220 110 260 145',fill:'none',stroke:'#7e8aa4','stroke-width':10}));
+  svg.appendChild(svgEl('circle',{cx:260,cy:150,r:21,fill:'#ffe37d'}));
+  const d=streetShadowData(),x=d.x,end=Math.min(890,d.shadowEnd);
+  svg.appendChild(svgEl('polygon',{points:`${x},397 ${end},397 ${Math.max(x,end-18)},413 ${x+10},407`,fill:'#050608',opacity:.7}));
+  drawDimension(x,430,end,430,`${(d.len/70).toFixed(1)} 米`,'h');
+  svg.appendChild(svgEl('circle',{cx:x,cy:315,r:18,fill:'#7adfff'}));
+  svg.appendChild(svgEl('line',{x1:x,y1:333,x2:x,y2:382,stroke:'#7adfff','stroke-width':14,'stroke-linecap':'round'}));
+  svg.appendChild(svgEl('line',{x1:x,y1:380,x2:x-12,y2:400,stroke:'#7adfff','stroke-width':9}));
+  svg.appendChild(svgEl('line',{x1:x,y1:380,x2:x+12,y2:400,stroke:'#7adfff','stroke-width':9}));
+  svg.appendChild(svgEl('rect',{x:x-38,y:276,width:76,height:130,fill:'transparent',cursor:'ew-resize','data-drag':'street','pointer-events':'all'}));
+  if(!S.tutorialActive) drawDragBadge(x,270,'拖动人');
+  text(450,80,'挑战 1：让影子长度超过 3 米',21,'#fff');
+  if(d.len/70>=3){S.streetDone=true;if(!S.tutorialActive)drawCallout(520,120,250,'已超过 3 米：同一个人，只因位置关系变化，影子长度就变了。',end,400,{side:'right'});}
+}
+function drawTwoLamp(){
+  clear();initDefs();
+  svg.appendChild(svgEl('rect',{x:0,y:405,width:900,height:155,fill:'#29213d'}));
+  const lamps=[[180,210],[720,210]];
+  lamps.forEach(([x,y],i)=>{if(i===1&&!S.twoLampRight)return;svg.appendChild(svgEl('circle',{cx:x,cy:y,r:20,fill:'#ffe276'}));});
+  svg.appendChild(svgEl('rect',{x:430,y:285,width:55,height:120,rx:16,fill:'#76dcff'}));
+  svg.appendChild(svgEl('polygon',{points:'440,400 660,400 470,390',fill:'#08090d',opacity:.55}));
+  if(S.twoLampRight) svg.appendChild(svgEl('polygon',{points:'475,400 250,400 445,390',fill:'#08090d',opacity:.55}));
+  text(450,80,'挑战 2：两盏灯为什么会出现两个影子？',21,'#fff');
+  if(!S.tutorialActive)drawCallout(315,120,270,S.twoLampRight?'两盏灯形成两套“光源—遮挡”关系，所以出现两个影子。':'关掉右灯后，只剩左灯对应的那套影子。',455,395,{side:'bottom'});
+}
+
+function drawEarthDayNight(cx,cy,r){
+  svg.appendChild(svgEl('circle',{cx,cy,r,fill:'#4f9aeb',stroke:'#b9dcff','stroke-width':2}));
+  const clip=svgEl('clipPath',{id:'earthClip'});clip.appendChild(svgEl('circle',{cx,cy,r}));svg.querySelector('defs').appendChild(clip);
+  svg.appendChild(svgEl('rect',{x:cx,y:cy-r,width:r+2,height:2*r,fill:'#17284b',opacity:.78,'clip-path':'url(#earthClip)'}));
+  text(cx-r*.48,cy-r-18,'白天侧',12,'#ffe58a');
+  text(cx+r*.48,cy-r-18,'夜晚侧',12,'#a9c8ff');
+}
+const ECLIPSE_EARTH_X=620, ECLIPSE_EARTH_Y=280, ECLIPSE_ORBIT_R=148;
+function normalizeAngle(a){
+  while(a<=-Math.PI)a+=Math.PI*2;
+  while(a>Math.PI)a-=Math.PI*2;
+  return a;
+}
+function moonOrbitPosition(){
+  return {
+    x:ECLIPSE_EARTH_X+Math.cos(S.eclipseAngle)*ECLIPSE_ORBIT_R,
+    y:ECLIPSE_EARTH_Y+Math.sin(S.eclipseAngle)*ECLIPSE_ORBIT_R
+  };
+}
+function setMoonOrbitFromPointer(x,y){
+  S.eclipseAngle=Math.atan2(y-ECLIPSE_EARTH_Y,x-ECLIPSE_EARTH_X);
+  const p=moonOrbitPosition();S.eclipseMoonX=p.x;S.eclipseMoonY=p.y;
+}
+function solarAlignment(){
+  const diff=Math.abs(normalizeAngle(S.eclipseAngle-Math.PI));
+  return {aligned:diff<0.12,near:diff<0.34,diff};
+}
+function lunarAlignment(){
+  const diff=Math.abs(normalizeAngle(S.eclipseAngle));
+  return {aligned:diff<0.12,near:diff<0.34,diff};
+}
+function drawEclipseChallenge(){
+  clear();initDefs();
+  const solar=S.eclipseMode==='solar';
+  const ex=ECLIPSE_EARTH_X,ey=ECLIPSE_EARTH_Y,er=64,mr=22;
+  const {x:mx,y:my}=moonOrbitPosition();S.eclipseMoonX=mx;S.eclipseMoonY=my;
+  svg.appendChild(svgEl('rect',{x:0,y:0,width:900,height:560,fill:solar?'#6ba6d8':'#111a39',opacity:.94}));
+  svg.appendChild(svgEl('circle',{cx:120,cy:280,r:62,fill:'#ffd563'}));
+  text(120,372,'太阳',14,'#fff0a0');
+
+  // 月球真实运动被简化成围绕地球的圆形轨道；孩子只能沿轨道拖动。
+  svg.appendChild(svgEl('circle',{cx:ex,cy:ey,r:ECLIPSE_ORBIT_R,fill:'none',stroke:'#c9def5','stroke-width':2,'stroke-dasharray':'7 7',opacity:.58}));
+  drawEarthDayNight(ex,ey,er);text(ex,382,'地球',14,'#d8edff');
+
+  if(solar){
+    const a=solarAlignment();
+    // 月球挡光后形成的影子朝向地球，仅在月球位于太阳侧时强调。
+    if(Math.cos(S.eclipseAngle)<-0.35){
+      const earthLeft=ex-er;
+      const spread=20;
+      svg.appendChild(svgEl('polygon',{points:`${mx+mr},${my-mr*.55} ${earthLeft},${ey-spread} ${earthLeft},${ey+spread} ${mx+mr},${my+mr*.55}`,fill:'#0a1021',opacity:a.near?.55:.28}));
+    }
+    if(a.near){
+      svg.appendChild(svgEl('ellipse',{cx:ex-er+5,cy:ey,rx:a.aligned?9:18,ry:a.aligned?15:27,fill:'#0a0c12',opacity:a.aligned?.88:.38}));
+      if(a.aligned){
+        svg.appendChild(svgEl('ellipse',{cx:ex-er+5,cy:ey,rx:28,ry:38,fill:'#151b2d',opacity:.23}));
+        S.solarDone=true;
+        if(!S.tutorialActive)drawCallout(390,105,320,'对齐成功：月球沿轨道运行到太阳和地球之间。月球的影子落到地球白天侧，中心较暗区域可看到日全食，周边区域可能看到日偏食。',ex-er+5,ey,{side:'right'});
+      }
+    }
+    text(450,72,'挑战 3A：白天——沿月球轨道转到太阳与地球之间',20,'#fff');
+    text(ex,470,'日食发生在地球的白天侧',13,'#ffe595');
+    // 未对齐时保持画面简洁；需要时可用“需要提示”重新显示轨道指引。
+  }else{
+    const a=lunarAlignment();
+    // 地球背向太阳的一侧形成影子区域。
+    svg.appendChild(svgEl('polygon',{points:`${ex+er-5},${ey-48} 875,${ey-80} 875,${ey+80} ${ex+er-5},${ey+48}`,fill:'#161e35',opacity:.32}));
+    svg.appendChild(svgEl('polygon',{points:`${ex+er-5},${ey-34} 875,${ey-54} 875,${ey+54} ${ex+er-5},${ey+34}`,fill:'#070a14',opacity:.64}));
+    text(790,205,'地球背后的影子区域',12,'#c5d0e8');
+    text(450,72,'挑战 3B：夜晚——沿月球轨道转进地球背后的影子区域',20,'#fff');
+    text(ex,470,'月食发生时，月球位于地球背向太阳的一侧',13,'#bcd4ff');
+    if(a.aligned){
+      S.lunarDone=true;
+      if(!S.tutorialActive)drawCallout(400,105,320,'进入影子区域：地球挡住太阳光，月球沿轨道运行到地球背后并进入影子区域，于是发生月食；这时月球位于地球的夜晚一侧。',mx,my,{side:'right'});
+    }
+  }
+
+  const moon=svgEl('g',{'data-drag':'moonOrbit',cursor:'grab'});
+  moon.appendChild(svgEl('circle',{cx:mx,cy:my,r:42,fill:'transparent','pointer-events':'all'}));
+  moon.appendChild(svgEl('circle',{cx:mx,cy:my,r:mr,fill:(!solar&&lunarAlignment().aligned)?'#c56b4d':'#d4d7df',stroke:'#fff','stroke-width':2}));
+  svg.appendChild(moon);
+  if(!S.tutorialActive) drawDragBadge(mx,my-46,'沿轨道拖月球','↻');
+}
+
+function validationScene(){
+  const h=S.validationHypothesis;
+  if(h==null){drawLab({labels:true,dragHints:false,draggableWall:false,draggableLamp:false,shadowCue:false});return;}
+  if(h===0) drawLab({labels:true,dragHints:false,draggableWall:false,draggableLamp:false,shadowCue:false,validationMark:S.validationResult?'off':null});
+  else if(h===1) drawLab({labels:true,dragHints:false,draggableWall:false,draggableLamp:false,shadowCue:false,validationMark:S.validationResult?'paper':null});
+  else if(h===2) drawLab({labels:true,dragHints:false,draggableWall:false,draggableLamp:false,shadowCue:false,forceRays:S.validationResult==='pass',validationMark:S.validationResult==='pass'?'pass':null});
+  else drawLab({labels:true,dragHints:false,draggableWall:false,draggableLamp:false,shadowCue:false,validationMark:S.validationResult?'glass':null});
+}
+
+function currentGuideSteps(){
+  const common={};
+  if(S.stage===0) return [
+    {text:'① 按住下面的灯架或底座左右拖动，整盏灯（灯头 + 支架）会一起移动。',box:[28,116,285],target:()=>[S.lampX-10,FLOOR_Y-8],side:'bottom'},
+    {text:'② 按住小光身体左右拖动；如果想精确一点，也可以用右侧“小光位置”滑杆。',box:[300,112,285],target:()=>[S.robotX,330],side:'bottom'},
+    {text:'③ 开灯后，拖动时重点看两处：墙上影子的高度，以及地面影子的长度。黄色尺寸线会实时标出来。',box:[500,108,300],target:()=>[S.wallX-35,330],side:'right'}
+  ];
+  if(S.stage===1) return [
+    {text:'一次只改一个变量。先移动小光，观察黄色的“墙上高度”和“地面长度”分别怎样变。',box:[465,112,305],target:()=>[S.wallX-45,330],side:'right'},
+    {text:'再只改变亮度。你会发现影子的深浅明显变化，但几何边界基本不变。',box:[430,155,300],target:()=>[S.wallX-20,320],side:'right'}
+  ];
+  if(S.stage===2) return [{text:'别急着找“标准答案”。选一个你认为能同时解释关灯、材料、位置变化的假设，然后让实验检验它。',box:[305,135,310],target:()=>[S.robotX,320],side:'bottom'}];
+  if(S.stage===3) return [{text:'右侧黄色大按钮才是“开始实验”。点击后，不要看弹窗，直接看箭头指向的光路或影子变化。',box:[470,130,300],target:()=>[S.wallX-28,315],side:'right'}];
+  if(S.stage===4) return [{text:'先沿蓝色光线看：它们没有撞上小光，所以还能到达墙面。再看黄色光路：碰到小光后，就不能继续到达后方。',box:[455,110,320],target:()=>[S.wallX-35,215],side:'right'}];
+  if(S.stage===5) return [{text:'移动灯、小光或墙面时，盯住黄色尺寸标记，比较墙上高度和地面长度分别怎样变化。',box:[455,110,315],target:()=>[S.wallX-48,330],side:'right'}];
+  if(S.stage===6) return [{text:'左侧光源上下两端有黄色手柄：直接上下拉伸就能改变光源大小；右侧滑杆会同步变化。只看墙面影子的边缘：它会从清楚变成带浅色过渡的模糊边缘。',box:[325,112,335],target:()=>[150,260-S.sourceSize*2.4],side:'left'}];
+  if(S.challenge===0) return [{text:'按住人物左右拖动，目标不是“离灯越远”这句话，而是让黄色地面标尺真的超过 3 米。',box:[470,115,300],target:()=>[Math.min(875,streetShadowData().shadowEnd),400],side:'right'}];
+  if(S.challenge===1) return [{text:'两盏灯各自产生一套光路和遮挡关系。右侧关掉一盏灯，再看哪一个影子消失。',box:[315,115,290],target:()=>[455,395],side:'bottom'}];
+  return [{text:S.eclipseMode==='solar'?'月球不能随意平移。按住月球沿圆形轨道转动，把它转到太阳与地球之间并对齐。':'继续沿同一条圆形轨道转动月球，把它转到地球背向太阳的一侧并进入地球背后的影子区域。',box:[420,112,335],target:()=>{const p=moonOrbitPosition();return [p.x,p.y]},side:'bottom'}];
+}
+function drawGuide(){
+  if(!S.tutorialActive) return;
+  const steps=currentGuideSteps();
+  if(!steps.length) return;
+  const step=steps[Math.min(S.tutorialStep,steps.length-1)];
+  const [x,y,w]=step.box,[tx,ty]=step.target();
+  drawCallout(x,y,w,step.text,tx,ty,{side:step.side,button:true,fontSize:13});
+}
+function advanceGuide(){
+  const steps=currentGuideSteps();
+  if(S.tutorialStep<steps.length-1){S.tutorialStep++;renderScene();}
+  else{
+    S.tutorialActive=false;S.tutorialStep=0;S.tutorialSeen[S.stage]=true;renderScene();
+    showStatus('指引已收起。之后需要时，点击右侧“需要提示”可以重新显示本阶段的指示线和说明。','info',3200);
+  }
+}
+function restartGuide(){
+  S.tutorialActive=true;S.tutorialStep=0;renderScene();
+  showStatus('已重新显示本阶段指引。按“我知道了”逐条查看。','info',1800);
+}
+
+function renderScene(){
+  if(S.stage===0) drawLab({draggableWall:false});
+  else if(S.stage===1) drawLab({draggableWall:true});
+  else if(S.stage===2) drawLab({labels:true,draggableWall:false});
+  else if(S.stage===3) validationScene();
+  else if(S.stage===4) drawLab({forceRays:S.rays,labels:true,draggableWall:false});
+  else if(S.stage===5){S.rays=true;drawLab({forceRays:true,labels:true,draggableWall:true});}
+  else if(S.stage===6) drawPenumbra();
+  else if(S.challenge===0) drawStreetChallenge();
+  else if(S.challenge===1) drawTwoLamp();
+  else drawEclipseChallenge();
+  drawGuide();
+}
+
+function rangeBlock(id,label,min,max,value,step=1,formatter=null){
+  const shown=formatter?formatter(value):Math.round(value);
+  return `<div class="seg"><label>${label} <span class="range-value" data-for="${id}">${shown}</span></label><input id="${id}" type="range" min="${min}" max="${max}" step="${step}" value="${value}"></div>`;
+}
+function syncRangeValue(id,value,formatter=v=>Math.round(v)){
+  const input=document.getElementById(id);if(input)input.value=value;
+  const label=panel.querySelector(`[data-for="${id}"]`);if(label)label.textContent=formatter(value);
+}
+function syncPanelValues(){
+  syncRangeValue('lampX',S.lampX);syncRangeValue('robotX',S.robotX);syncRangeValue('wallX',S.wallX);
+  syncRangeValue('streetX',S.streetPersonX);syncRangeValue('bright',S.brightness,v=>Number(v).toFixed(2));syncRangeValue('size',S.sourceSize);
+  const deg=(S.eclipseAngle*180/Math.PI+360)%360;syncRangeValue('moonAngle',deg,v=>`${Math.round(v)}°`);
+}
+function bindPositionRange(id,kind,obs){
+  const el=document.getElementById(id);if(!el)return;
+  let base=null;
+  const begin=()=>{base=shadowMetrics();};
+  el.onpointerdown=begin;el.onfocus=()=>{if(!base)base=shadowMetrics();};
+  el.oninput=e=>{if(!base)base=shadowMetrics();updatePosition(kind,+e.target.value,null,base);scheduleScene();syncPanelValues();};
+  el.onchange=()=>{if(S.lampOn)addObs(obs);base=null;renderPanel();};
+}
+function bindMoonOrbitRange(){
+  const el=document.getElementById('moonAngle');if(!el)return;
+  el.oninput=e=>{
+    S.eclipseAngle=(+e.target.value)*Math.PI/180;
+    const p=moonOrbitPosition();S.eclipseMoonX=p.x;S.eclipseMoonY=p.y;
+    scheduleScene();syncPanelValues();
+  };
+}
+
+function runValidation(){
+  const h=S.validationHypothesis;
+  if(h===0){S.lampOn=false;S.validationResult='fail';S.lastChange='灯关掉后，墙上和地面影子一起消失';}
+  else if(h===1){S.surfaceType='paper';S.validationResult='fail';S.lastChange='换成白纸屏，影子仍然出现';}
+  else if(h===2){S.lampOn=true;S.rays=true;S.validationResult='pass';S.lastChange='小光正后方缺少直达光';}
+  else{S.material='glass';S.validationResult='fail';S.lastChange='外形不变，但透明后影子明显变弱';}
+  S.tutorialActive=false;
+  renderAll();
+  const info=validationInfo[h];
+  if(info.pass){
+    showStatus('验证通过。先看光路结果，随后进入“科学透视”。','good');
+    setTimeout(()=>{
+      if(S.stage===3&&S.validationHypothesis===2&&S.validationResult==='pass'){
+        S.stage=4;S.rays=true;S.material='opaque';S.surfaceType='wall';S.wallVisible=true;S.lastChange='';
+        clearStatus();renderAll();
+      }
+    },1800);
+  }else showStatus('实验结果不支持这条假设。使用右下角“重新选择”修改假设。','bad');
+}
+function prepareValidation(){
+  S.validationHypothesis=S.hypothesis;S.validationResult=null;S.lampOn=true;S.rays=false;S.wallVisible=true;S.surfaceType='wall';S.material='opaque';S.lastChange='';S.tutorialActive=false;
+}
+
+function renderPanel(){
+  panel.innerHTML='';
+  if(S.stage===0){
+    panel.innerHTML=`
+      <div class="controls"><button class="btn alt" id="lampBtn">${S.lampOn?'关闭灯':'打开灯'}</button></div>
+      <div class="row">${rangeBlock('lampX','灯架位置',70,Math.min(255,S.robotX-155),S.lampX)}${rangeBlock('robotX','小光位置',Math.max(260,S.lampX+155),Math.min(670,S.wallX-110),S.robotX)}</div>
+      <div class="mini">灯头、支架和底座是一个整体：拖下面的灯架，灯头也会一起移动。首次指引结束后，可用“需要提示”重新显示指示线。</div>`;
+    document.getElementById('lampBtn').onclick=()=>{S.lampOn=!S.lampOn;S.lastChange=S.lampOn?'看这里：墙上和地面都出现了影子':'看这里：影子跟着光一起消失';addObs(S.lampOn?'打开灯 → 墙面与地面出现影子':'关掉灯 → 影子消失');renderAll();};
+    bindPositionRange('lampX','lamp','移动光源 → 墙上影子边界发生变化');
+    bindPositionRange('robotX','robot','移动小光 → 墙上高度与地面长度重新分配');
+  }else if(S.stage===1){
+    panel.innerHTML=`
+      <div class="row">${rangeBlock('lampX','灯架位置',70,Math.min(255,S.robotX-155),S.lampX)}${rangeBlock('robotX','小光位置',Math.max(260,S.lampX+155),Math.min(670,S.wallX-110),S.robotX)}</div>
+      <div class="row">${rangeBlock('wallX','墙面位置',Math.max(650,S.robotX+110),855,S.wallX)}${rangeBlock('bright','亮度',0.35,1.4,S.brightness,0.05,v=>Number(v).toFixed(2))}</div>
+      <div class="controls"><button class="btn alt" id="lampBtn">${S.lampOn?'关闭灯':'打开灯'}</button></div>
+      <div class="observation">${S.observations.map(x=>`<div class="obs">${x}</div>`).join('')||'<div class="mini">还没有观察记录。松开拖动或滑杆后，只记录一次结果。</div>'}</div>`;
+    bindPositionRange('lampX','lamp','移动光源 → 墙上影子边界改变');
+    bindPositionRange('robotX','robot','移动小光 → 墙上高度与地面长度重新分配');
+    bindPositionRange('wallX','wall','移动墙面 → 影子落到墙面和地面的比例改变');
+    const bright=document.getElementById('bright');
+    bright.oninput=e=>{S.brightness=+e.target.value;S.lastChange='看这里：影子深浅变了，但黄色几何边界基本不动';scheduleScene();syncPanelValues();};
+    bright.onchange=()=>{addObs('改变亮度 → 影子深浅改变，但几何边界基本不变');renderPanel();};
+    document.getElementById('lampBtn').onclick=()=>{S.lampOn=!S.lampOn;S.lastChange=S.lampOn?'开灯：影子重新出现':'关灯：影子消失';addObs(S.lampOn?'打开灯 → 影子出现':'关掉灯 → 影子消失');renderAll();};
+  }else if(S.stage===2){
+    panel.innerHTML=`<div class="choice-grid">${hypothesisLabels.map((c,i)=>`<div class="choice ${S.hypothesis===i?'selected':''}" data-i="${i}">${String.fromCharCode(65+i)}. ${c}</div>`).join('')}</div><div class="mini" style="margin-top:8px">下一步只验证你选中的这一条；错误实验结束后必须回来重选。</div>`;
+    panel.querySelectorAll('.choice').forEach(c=>c.onclick=()=>{S.hypothesis=+c.dataset.i;showStatus('假设已记录。点击右下角“继续探索”进入对应实验。','info',2200);renderPanel();});
+  }else if(S.stage===3){
+    const h=S.validationHypothesis;
+    if(h==null){
+      panel.innerHTML=`<div class="challenge"><strong>你从章节导航直接来到了实验验证。</strong><br>先在这里选一条要验证的假设，实验才知道该做什么。</div><div class="choice-grid">${hypothesisLabels.map((c,i)=>`<div class="choice" data-i="${i}">${String.fromCharCode(65+i)}. ${c}</div>`).join('')}</div>`;
+      panel.querySelectorAll('.choice').forEach(c=>c.onclick=()=>{S.hypothesis=+c.dataset.i;prepareValidation();renderAll();});
+    }else{
+      const info=validationInfo[h];
+      const result=S.validationResult?`<div class="validation-result ${info.pass?'pass':'fail'}"><strong>${info.pass?'验证通过':'这条假设没有通过'}</strong><br>${info.result}</div>`:'';
+      panel.innerHTML=`
+        <div class="challenge"><strong>你的假设：</strong><br>${hypothesisLabels[h]}</div>
+        <div class="challenge"><strong>${info.title}</strong><br>${info.prediction}</div>
+        ${result}
+        <div class="controls">
+          ${!S.validationResult?`<div class="cta-guide">👇 现在点击这里，让实验真正发生</div><button class="btn experiment-cta" id="validateBtn">执行实验：${info.action}</button>`:''}
+        </div>`;
+      if(document.getElementById('validateBtn'))document.getElementById('validateBtn').onclick=runValidation;
+    }
+  }else if(S.stage===4){
+    panel.innerHTML=`
+      <div class="legend"><span><i class="sw"></i>被小光挡住的光 / 边界</span><span><i class="sw blue"></i>能到达墙面的光</span></div>
+      <div class="result"><strong>核心模型：</strong><br>小光挡住了一部分原本会继续传播的直接光，所以它后方的表面收到的直达光更少，那里看起来较暗，这就是影子。</div>
+      <div class="controls"><button class="btn alt" id="rayBtn">${S.rays?'隐藏光路':'显示光路'}</button></div>`;
+    document.getElementById('rayBtn').onclick=()=>{S.rays=!S.rays;renderAll();};
+  }else if(S.stage===5){
+    const m=shadowMetrics();
+    panel.innerHTML=`
+      <div class="result"><strong>观察两个尺寸：</strong><br>墙上影子高度：<b>${Math.round(m.wallH)}</b>　地面影子长度：<b>${Math.round(m.floorLen)}</b><br>移动灯、小光或墙面，比较这两个数怎样变化。</div>
+      <div class="row">${rangeBlock('lampX','灯架位置',70,Math.min(255,S.robotX-155),S.lampX)}${rangeBlock('robotX','小光位置',Math.max(260,S.lampX+155),Math.min(670,S.wallX-110),S.robotX)}</div>
+      <div class="row">${rangeBlock('wallX','墙面位置',Math.max(650,S.robotX+110),855,S.wallX)}</div>`;
+    bindPositionRange('lampX','lamp','移动光源 → 影子分布改变');bindPositionRange('robotX','robot','移动小光 → 墙上与地面影子重新分配');bindPositionRange('wallX','wall','移动墙面 → 影子分布改变');
+  }else if(S.stage===6){
+    panel.innerHTML=`<div class="result"><strong>这一步只观察“清楚还是模糊”：</strong><br>光源很小时，影子边缘通常更清楚；光源变大后，不同位置发出的光会叠加，边缘会出现浅浅的过渡，看起来更模糊。</div>${rangeBlock('size','光源大小',2,45,S.sourceSize)}<div class="mini">可以直接上下拉伸左侧黄色光源，也可以拖右侧滑杆；两边会同步。不要背新名词，只比较边缘变化。</div>`;
+    const size=document.getElementById('size');size.oninput=e=>{S.sourceSize=+e.target.value;scheduleScene();syncPanelValues();};
+  }else{
+    if(S.challenge===0){
+      panel.innerHTML=`<div class="challenge"><strong>挑战 1/3：路灯下的人</strong><br>拖动人，让黄色地面标尺显示的影子长度超过 3 米。</div>${rangeBlock('streetX','人物位置',310,770,S.streetPersonX)}<div class="mini">人物可直接按住连续拖动。完成后使用右下角“继续探索”。</div>`;
+      const street=document.getElementById('streetX');street.oninput=e=>{updatePosition('street',+e.target.value);scheduleScene();syncPanelValues();};
+    }else if(S.challenge===1){
+      panel.innerHTML=`<div class="challenge"><strong>挑战 2/3：两盏舞台灯</strong><br>先观察两个影子，再关掉右灯，判断哪一套影子消失。</div><div class="controls"><button class="btn alt" id="lamp2">${S.twoLampRight?'关掉右灯':'打开右灯'}</button></div><div class="mini">完成后继续使用右下角“继续探索”。</div>`;
+      document.getElementById('lamp2').onclick=()=>{S.twoLampRight=!S.twoLampRight;renderAll();};
+    }else{
+      const solar=S.eclipseMode==='solar';
+      const done=solar?S.solarDone:S.lunarDone;
+      const angleDeg=(S.eclipseAngle*180/Math.PI+360)%360;
+      panel.innerHTML=`
+        <div class="challenge"><strong>挑战 3/3：日食与月食</strong><br>${solar?'白天：月球只能沿地球周围的圆形轨道转动。把它转到太阳与地球之间并对齐，月球的影子落到地球白天侧时可能形成日全食。':'夜晚：继续让月球沿同一条轨道运行到地球背向太阳的一侧。月球进入地球背后的影子区域时形成月食。'}</div>
+        <div class="row"><button class="btn ${solar?'primary':''}" id="solarMode">白天 · 日全食</button><button class="btn ${!solar?'primary':''}" id="lunarMode">夜晚 · 月食</button></div>
+        ${rangeBlock('moonAngle','月球沿轨道的位置',0,360,angleDeg,1,v=>`${Math.round(v)}°`)}
+        <div class="mini">优先直接拖动画面中的月球：它会被限制在圆形轨道上，不会随意平移。滑杆和圆形拖动同步。</div>
+        <div class="result"><strong>${done?'✓ 已完成本模式对齐':'当前目标'}</strong><br>${solar?'太阳 → 月球 → 地球：月球挡住太阳光，日食发生在白天侧。':'太阳 → 地球 → 月球：地球挡住太阳光，月球进入地球影子，月食在夜晚观察。'}</div>
+        ${S.solarDone&&S.lunarDone?'<div class="result"><strong>两个现象的共同模型：</strong><br>都是“光源—遮挡物—影子区域”。这个二维实验把月球轨道简化成同一平面；现实中月球轨道相对黄道约倾斜 5°，所以不是每个月都会发生日食或月食。</div>':''}`;
+      document.getElementById('solarMode').onclick=()=>{S.eclipseMode='solar';S.tutorialActive=false;renderAll();};
+      document.getElementById('lunarMode').onclick=()=>{S.eclipseMode='lunar';S.tutorialActive=false;renderAll();};
+      bindMoonOrbitRange();
+    }
+  }
+}
+
+let renderRaf=0;
+function scheduleScene(){if(renderRaf)return;renderRaf=requestAnimationFrame(()=>{renderRaf=0;renderScene();});}
+function clientToSvg(e){const pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;return pt.matrixTransform(svg.getScreenCTM().inverse());}
+let dragState=null;
+svg.addEventListener('pointerdown',e=>{
+  const guide=e.target.closest&&e.target.closest('[data-guide-next]');
+  if(guide){e.preventDefault();return;}
+  const target=e.target.closest&&e.target.closest('[data-drag]');if(!target)return;
+  const kind=target.getAttribute('data-drag');if(!kind)return;
+  e.preventDefault();
+  dragState={kind,pointerId:e.pointerId,startMetrics:(kind==='lamp'||kind==='robot'||kind==='wall')?shadowMetrics():null};
+  try{svg.setPointerCapture(e.pointerId);}catch(err){}
+  document.body.style.userSelect='none';
+});
+svg.addEventListener('pointermove',e=>{
+  if(!dragState||e.pointerId!==dragState.pointerId)return;
+  e.preventDefault();const p=clientToSvg(e);
+  if(dragState.kind==='sourceTop') S.sourceSize=clamp((260-p.y)/2.4,2,45);
+  else if(dragState.kind==='sourceBottom') S.sourceSize=clamp((p.y-260)/2.4,2,45);
+  else if(dragState.kind==='moonOrbit') setMoonOrbitFromPointer(p.x,p.y);
+  else updatePosition(dragState.kind,p.x,p.y,dragState.startMetrics);
+  scheduleScene();syncPanelValues();
+});
+function endDrag(e){
+  if(!dragState||(e.pointerId!=null&&e.pointerId!==dragState.pointerId))return;
+  const kind=dragState.kind,base=dragState.startMetrics;dragState=null;document.body.style.userSelect='';
+  try{svg.releasePointerCapture(e.pointerId);}catch(err){}
+  if(S.lampOn&&kind==='robot') addObs(describeMetricChange(base,shadowMetrics(),'移动小光').replace('看这里：','移动小光 → '));
+  if(S.lampOn&&kind==='lamp') addObs(describeMetricChange(base,shadowMetrics(),'移动光源').replace('看这里：','移动光源 → '));
+  if(S.lampOn&&kind==='wall') addObs(describeMetricChange(base,shadowMetrics(),'移动墙面').replace('看这里：','移动墙面 → '));
+  if(kind==='street'&&streetShadowData().len/70>=3)S.streetDone=true;
+  if(kind==='moonOrbit'){if(S.eclipseMode==='solar'&&solarAlignment().aligned)S.solarDone=true;if(S.eclipseMode==='lunar'&&lunarAlignment().aligned)S.lunarDone=true;}
+  renderPanel();renderScene();
+}
+svg.addEventListener('pointerup',endDrag);svg.addEventListener('pointercancel',endDrag);
+svg.addEventListener('click',e=>{const g=e.target.closest&&e.target.closest('[data-guide-next]');if(g){e.preventDefault();advanceGuide();}});
+
+function jumpToStage(i){
+  if(!S.reviewUnlocked)return;
+  if(i<0||i>=stages.length)return;
+  document.getElementById('celebration').classList.add('hidden');
+  S.stage=i;S.challenge=0;S.lastChange='';S.explorationComplete=false;clearStatus();
+  if(i>=4)S.lampOn=true;
+  if(i===3){
+    if(S.hypothesis!=null)prepareValidation();
+    else{S.validationHypothesis=null;S.validationResult=null;S.lampOn=true;}
+  }
+  resetGuideForStage(false);
+  renderAll();
+  showStatus(`已跳转到第 ${i+1} 部分。回顾模式中可以继续用右上角圆点切换内容。`,'info',1800);
+}
+
+function resetGuideForStage(auto=false){S.tutorialStep=0;S.tutorialActive=auto;}
+function renderAll(){
+  const st=stages[S.stage];titleEl.textContent=S.stage===7?`8. 迁移挑战 · 挑战 ${S.challenge+1}/3`:st.title;chipEl.textContent=st.chip;talkEl.textContent=st.talk;modeBadge.textContent=st.mode;objectiveEl.innerHTML=st.obj;
+  document.getElementById('hintBox').classList.add('hidden');progress();renderScene();renderPanel();
+  const prev=document.getElementById('prevBtn'),next=document.getElementById('nextBtn'),hint=document.getElementById('hintBtn');
+  prev.disabled=S.stage===0;hint.textContent='需要提示';
+  if(S.stage===3){
+    const hasValidation=S.validationHypothesis!=null;
+    const failed=hasValidation&&S.validationResult&&validationInfo[S.validationHypothesis]&&!validationInfo[S.validationHypothesis].pass;
+    next.disabled=!failed;next.textContent=failed?'重新选择':(hasValidation?'先执行当前验证':'先选择要验证的假设');
+  }
+  else if(S.explorationComplete){next.disabled=true;next.textContent='探索完成 ✓';}
+  else{next.disabled=false;next.textContent='继续探索 →';}
+}
+
+document.getElementById('hintBtn').onclick=restartGuide;
+document.getElementById('prevBtn').onclick=()=>{
+  if(S.stage>0){
+    S.stage--;if(S.stage!==3){S.validationResult=null;S.validationHypothesis=null;}S.challenge=0;S.lastChange='';S.explorationComplete=false;resetGuideForStage(false);clearStatus();renderAll();
+  }
+};
+document.getElementById('nextBtn').onclick=()=>{
+  if(S.stage===0&&!S.lampOn){showStatus('先打开灯，再继续。首次指引会告诉你拖哪里、看哪里。','bad',2600);return;}
+  if(S.stage===1&&S.observations.length<3){showStatus(`目前记录了 ${S.observations.length} 条规律，还需要至少 ${3-S.observations.length} 条。`,'bad',2600);return;}
+  if(S.stage===2&&S.hypothesis===null){showStatus('先选一个你目前最相信的假设。','bad',2400);return;}
+  if(S.stage===2){S.stage=3;prepareValidation();clearStatus();renderAll();return;}
+  if(S.stage===3){
+    const failed=S.validationResult&&validationInfo[S.validationHypothesis]&&!validationInfo[S.validationHypothesis].pass;
+    if(failed){S.stage=2;S.hypothesis=null;S.validationHypothesis=null;S.validationResult=null;S.lampOn=true;S.surfaceType='wall';S.material='opaque';S.lastChange='';clearStatus();renderAll();}
+    else showStatus('先点击右侧黄色“执行实验”按钮完成当前验证。','bad',2200);
+    return;
+  }
+  if(S.stage===7){
+    if(S.challenge===0){
+      if(streetShadowData().len/70<3){showStatus('先把黄色地面标尺拉到 3 米以上。','bad',2400);return;}
+      S.challenge=1;S.lastChange='';resetGuideForStage(false);clearStatus();renderAll();return;
+    }
+    if(S.challenge===1){
+      if(S.twoLampRight){showStatus('先关掉右边的灯，确认少了一套影子，再继续。','bad',2400);return;}
+      S.challenge=2;S.eclipseMode='solar';S.eclipseAngle=-Math.PI/2;setMoonOrbitFromPointer(ECLIPSE_EARTH_X,ECLIPSE_EARTH_Y-ECLIPSE_ORBIT_R);resetGuideForStage(false);clearStatus();renderAll();return;
+    }
+    if(S.challenge===2){
+      if(S.eclipseMode==='solar'){
+        if(!S.solarDone){showStatus('先把月球拖到太阳和地球之间并对齐，形成日全食条件。','bad',2600);return;}
+        S.eclipseMode='lunar';resetGuideForStage(false);showStatus('日食条件已找到。现在切到夜晚：继续沿圆形轨道把月球转到地球背后的影子区域。','good',3200);renderAll();return;
+      }
+      if(!S.lunarDone){showStatus('先把月球沿轨道转进地球背后的影子区域。','bad',2400);return;}
+      if(!S.solarDone){S.eclipseMode='solar';showStatus('月食条件已找到。还需要完成白天的日食对齐。','good',2800);renderAll();return;}
+      S.explorationComplete=true;showStatus('完成：你已经走完全部 8 个部分。','good');renderAll();setTimeout(showCelebration,250);return;
+    }
+  }
+  S.stage++;S.challenge=0;S.lastChange='';if(S.stage>=4)S.lampOn=true;resetGuideForStage(false);clearStatus();renderAll();
+};
+
+
+// 右上角章节导航：第一次学习只显示进度；完成后主动选择“回顾 8 个内容”才解锁
+const navTip=document.getElementById('navTip');
+document.getElementById('navTipOk').onclick=()=>navTip.classList.add('hidden');
+
+// 完成庆祝与口头复述录音
+const celebration=document.getElementById('celebration');
+const confettiLayer=document.getElementById('confettiLayer');
+const recordBtn=document.getElementById('recordBtn');
+const stopRecordBtn=document.getElementById('stopRecordBtn');
+const recordState=document.getElementById('recordState');
+const recordPlayback=document.getElementById('recordPlayback');
+let mediaRecorder=null,recordChunks=[],recordStream=null,recordUrl=null;
+function launchConfetti(){
+  confettiLayer.innerHTML='';
+  for(let i=0;i<90;i++){
+    const c=document.createElement('span');c.className='confetti';
+    c.style.left=(Math.random()*100)+'%';
+    c.style.animationDuration=(2.8+Math.random()*2.8)+'s';
+    c.style.animationDelay=(Math.random()*.8)+'s';
+    c.style.transform=`rotate(${Math.random()*180}deg)`;
+    c.style.width=(7+Math.random()*7)+'px';c.style.height=(10+Math.random()*12)+'px';
+    confettiLayer.appendChild(c);
+  }
+  setTimeout(()=>{confettiLayer.innerHTML='';},6500);
+}
+function showCelebration(){celebration.classList.remove('hidden');launchConfetti();}
+document.getElementById('closeCelebration').onclick=()=>{
+  S.reviewUnlocked=true;
+  celebration.classList.add('hidden');
+  progress();
+  navTip.classList.remove('hidden');
+  showStatus('回顾模式已开启：现在可以点击右上角 1–8 圆点快速回顾任意部分。','good',3200);
+};
+async function startRecording(){
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia||typeof MediaRecorder==='undefined'){
+    recordState.textContent='当前浏览器不支持网页录音。可以换用最新版 Chrome / Edge / Safari，或直接口头讲给家长听。';return;
+  }
+  try{
+    recordStream=await navigator.mediaDevices.getUserMedia({audio:true});
+    recordChunks=[];
+    const opts=MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?{mimeType:'audio/webm;codecs=opus'}:undefined;
+    mediaRecorder=new MediaRecorder(recordStream,opts);
+    mediaRecorder.ondataavailable=e=>{if(e.data&&e.data.size)recordChunks.push(e.data);};
+    mediaRecorder.onstop=()=>{
+      const type=mediaRecorder.mimeType||'audio/webm';
+      const blob=new Blob(recordChunks,{type});
+      if(recordUrl)URL.revokeObjectURL(recordUrl);
+      recordUrl=URL.createObjectURL(blob);recordPlayback.src=recordUrl;recordPlayback.classList.remove('hidden');
+      recordState.textContent='录音完成。先听一遍：你有没有说清楚“光源—遮挡—影子”的关系？';
+      recordBtn.classList.remove('hidden');stopRecordBtn.classList.add('hidden');
+      if(recordStream){recordStream.getTracks().forEach(t=>t.stop());recordStream=null;}
+    };
+    mediaRecorder.start();recordBtn.classList.add('hidden');stopRecordBtn.classList.remove('hidden');recordPlayback.classList.add('hidden');
+    recordState.textContent='正在录音……用自己的话讲，不需要背课本句子。';
+  }catch(err){recordState.textContent='没有获得麦克风权限。请允许麦克风后再试；也可以直接口头复述。';}
+}
+recordBtn.onclick=startRecording;
+stopRecordBtn.onclick=()=>{if(mediaRecorder&&mediaRecorder.state==='recording')mediaRecorder.stop();};
+
+renderAll();
+
+</script>
+</body>
+</html>
