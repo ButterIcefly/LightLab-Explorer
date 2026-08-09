@@ -1,14 +1,10 @@
+
 # 🌙 小光实验室：为什么会有影子？
 
 > 🔬 一个面向儿童的互动科学探索项目\
 > 通过实验、观察和推理，让孩子发现光与影子的秘密。
+<img width="1672" height="941" alt="LightLab Explorer" src="https://github.com/user-attachments/assets/3e1e2f88-d481-4858-b0f2-e458d5fc3ed9" />
 
-```{=html}
-<p align="center">
-```
-`<img src="preview.png" width="900">`{=html}
-```{=html}
-</p>
 ```
 
 ------------------------------------------------------------------------
@@ -70,6 +66,8 @@
 
 > 为什么打开灯以后会出现黑色区域？
 
+<img width="1219" height="716" alt="first" src="https://github.com/user-attachments/assets/c8f259f9-29b8-423c-b0de-93a285913b64" />
+
 ------------------------------------------------------------------------
 
 ### ② 🎮 动手实验
@@ -83,13 +81,20 @@
 
 观察不同结果。
 
+<img width="1222" height="726" alt="second" src="https://github.com/user-attachments/assets/d3dd196a-9180-40fa-9f3c-d3c072aec1fc" />
+
 ------------------------------------------------------------------------
 
 ### ③ ✅ 验证理解
 
+<img width="1222" height="718" alt="fourth" src="https://github.com/user-attachments/assets/c4424200-984d-445c-bae9-f020912cf27f" />
 最终认识：
 
 > 影子不是物体产生的黑色图像，而是物体阻挡部分光线后形成的明暗区域。
+<img width="1221" height="712" alt="stretch" src="https://github.com/user-attachments/assets/3e8745e6-fc48-4ce3-b613-4e0f81d9a934" />
+
+<img width="1301" height="916" alt="end" src="https://github.com/user-attachments/assets/81d59aea-abb7-4a3e-a3c9-891f6298f9e8" />
+
 
 ------------------------------------------------------------------------
 
