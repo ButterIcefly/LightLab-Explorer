@@ -178,7 +178,7 @@
 
 # 📚 制作方法沉淀
 
-本次制作过程中整理了一套可复用的方法，SKILL 和 Prompt可前往Releases获得：
+本次制作过程中整理了一套可复用的方法，SKILL 和 System Prompt可前往Releases获得：
 
 <div align="center">
 
